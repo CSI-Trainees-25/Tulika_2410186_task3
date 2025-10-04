@@ -1,62 +1,171 @@
-
 const canvas = document.querySelector('canvas');
 const c = canvas.getContext('2d');
 
-// Resize canvas to fill window
-//function resizeCanvas() {
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
- // drawGrid(); // redraw after resize
-//}
-//window.addEventListener('resize', resizeCanvas);
-//resizeCanvas(); // initial call
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
 
-//function drawGrid() {
-  const cols = 10;
-  const rows = 10;
-  const cellwidth = Math.floor(canvas.width / cols);
-  const cellheight = Math.floor(canvas.height / rows);
+const cols = 10;
+const rows = 10;
+const cellwidth = Math.floor(canvas.width / cols);
+const cellheight = Math.floor(canvas.height / rows);
 
-  //c.clearRect(0, 0, canvas.width, canvas.height); // clear before redraw
-  c.font = `${Math.min(cellwidth, cellheight) / 2}px Arial`;
-  c.textAlign = 'center';
-  c.textBaseline = 'middle';
+c.font = `${Math.min(cellwidth, cellheight) / 2}px Arial`;
+c.textAlign = 'center';
+c.textBaseline = 'middle';
 
-  let number = 1;
-  for (let row = rows - 1; row >= 0; row--) {
-    for (let col = 0; col < cols; col++) {
-      const actualCol = (row % 2 === 0 ? col : cols - 1 - col);
-      const x = actualCol * cellwidth;
-      const y = (rows - 1 - row) * cellheight;
+let number = 1;
+for (let row = 0; row < rows; row++) {
+  for (let col = 0; col < cols; col++) {
+    const actualCol = (row % 2 === 0 ? col : cols - 1 - col);
+    const x = actualCol * cellwidth;
+    const y = (rows - 1 - row) * cellheight;
 
-      c.strokeRect(x, y, cellwidth, cellheight);
-      c.fillStyle = 'rgb(30,30,30)';
-      c.fillText(number, x + cellwidth / 2, y + cellheight / 2);
-      number++;
-
+    c.strokeRect(x, y, cellwidth, cellheight);
+    c.fillStyle = 'rgb(30,30,30)';
+    c.fillText(number, x + cellwidth / 2, y + cellheight / 2);
+    number++;
 
     if(number%3==0){
-     c.fillStyle = 'rgba(173, 216, 230, 0.5)';
-    c.fillRect(x, y, cellwidth, cellheight);
+      c.fillStyle = 'rgba(173, 216, 230, 0.5)';
+      c.fillRect(x, y, cellwidth, cellheight);
     }
     else if(number%3==1){
-    
-    c.fillStyle = 'rgba(128, 0, 128, 0.5)';
-    c.fillRect(x, y, cellwidth, cellheight);
+      c.fillStyle = 'rgba(128, 0, 128, 0.5)';
+      c.fillRect(x, y, cellwidth, cellheight);
     }
-    else
-    {
-    c.fillStyle = 'rgba(255, 182, 193, 0.5)';
-    c.fillRect(x, y, cellwidth, cellheight);
-    }
+    else {
+      c.fillStyle = 'rgba(255, 182, 193, 0.5)';
+      c.fillRect(x, y, cellwidth, cellheight);
     }
   }
+}
 
-  function drawDiceFace(number, x, y, size) {
+// Define snakes (from -> to)
+const snakes = [
+  { from: 99, to: 7 },
+  { from: 70, to: 55 },
+  { from: 52, to: 35 },
+  { from: 37, to: 2 },
+  { from: 95, to: 72 }
+];
+
+// Define ladders (from -> to)
+const ladders = [
+  { from: 6, to: 25 },
+  { from: 11, to: 32 },
+  { from: 60, to: 81 },
+  { from: 46, to: 93 },
+  { from: 17, to: 65 }
+];
+
+// Helper function to get cell position from number
+function getCellPosition(number) {
+  number = number - 1;
+  const row = Math.floor(number / cols);
+  const col = number % cols;
+  const actualCol = (row % 2 === 0 ? col : cols - 1 - col);
+  const x = actualCol * cellwidth;
+  const y = (rows - 1 - row) * cellheight;
+  return { x, y };
+}
+
+// Store random control points for snakes so they don't change
+const snakeControlPoints = snakes.map(snake => {
+  const start = getCellPosition(snake.from);
+  const end = getCellPosition(snake.to);
+  const startX = start.x + cellwidth / 2;
+  const startY = start.y + cellheight / 2;
+  const endX = end.x + cellwidth / 2;
+  const endY = end.y + cellheight / 2;
+  return {
+    startX, startY, endX, endY,
+    controlX: (startX + endX) / 2 + (Math.random() - 0.5) * cellwidth,
+    controlY: (startY + endY) / 2
+  };
+});
+
+// Function to draw all snakes
+function drawSnakes() {
+  snakeControlPoints.forEach(snake => {
+    c.beginPath();
+    c.moveTo(snake.startX, snake.startY);
+    c.quadraticCurveTo(snake.controlX, snake.controlY, snake.endX, snake.endY);
+    c.strokeStyle = '#2d5016';
+    c.lineWidth = 8;
+    c.stroke();
+    
+    c.strokeStyle = '#4a7c23';
+    c.lineWidth = 5;
+    c.stroke();
+
+    c.beginPath();
+    c.arc(snake.startX, snake.startY, 15, 0, Math.PI * 2);
+    c.fillStyle = '#2d5016';
+    c.fill();
+    c.strokeStyle = '#1a3010';
+    c.lineWidth = 2;
+    c.stroke();
+
+    c.beginPath();
+    c.arc(snake.startX - 5, snake.startY - 3, 3, 0, Math.PI * 2);
+    c.arc(snake.startX + 5, snake.startY - 3, 3, 0, Math.PI * 2);
+    c.fillStyle = 'red';
+    c.fill();
+
+    c.beginPath();
+    c.arc(snake.endX, snake.endY, 8, 0, Math.PI * 2);
+    c.fillStyle = '#2d5016';
+    c.fill();
+  });
+}
+
+// Function to draw all ladders
+function drawLadders() {
+  ladders.forEach(ladder => {
+    const start = getCellPosition(ladder.from);
+    const end = getCellPosition(ladder.to);
+    
+    const startX = start.x + cellwidth / 2;
+    const startY = start.y + cellheight / 2;
+    const endX = end.x + cellwidth / 2;
+    const endY = end.y + cellheight / 2;
+
+    c.strokeStyle = '#8B4513';
+    c.lineWidth = 8;
+    c.beginPath();
+    c.moveTo(startX - 10, startY);
+    c.lineTo(endX - 10, endY);
+    c.stroke();
+    
+    c.beginPath();
+    c.moveTo(startX + 10, startY);
+    c.lineTo(endX + 10, endY);
+    c.stroke();
+
+    const rungs = 5;
+    for (let i = 0; i <= rungs; i++) {
+      const t = i / rungs;
+      const x = startX + (endX - startX) * t;
+      const y = startY + (endY - startY) * t;
+      c.beginPath();
+      c.moveTo(x - 10, y);
+      c.lineTo(x + 10, y);
+      c.strokeStyle = '#A0522D';
+      c.lineWidth = 5;
+      c.stroke();
+    }
+  });
+}
+
+// Draw initial snakes and ladders
+drawSnakes();
+drawLadders();
+
+function drawDiceFace(number, x, y, size) {
   c.fillStyle = 'grey';
   c.fillRect(x, y, size, size);
   c.strokeStyle = 'black';
-  c.lineWidth = 2;
+  c.lineWidth = 3;
   c.strokeRect(x, y, size, size);
 
   c.fillStyle = 'black';
@@ -72,10 +181,25 @@ const min1= Math.min(h,w);
 const x1= canvas.width/2 - min1/2;
 const y1= canvas.height/2 - min1/2;
 
-
-// Initial dice face
 let diceValue = Math.floor(Math.random() * 6) + 1;
 drawDiceFace(diceValue, x1, y1, min1);
+
+// Player position - starts at 0, first roll moves to position
+let playerPosition = 0;
+
+function drawPlayer(position) {
+  if (position === 0) return;
+  const pos = getCellPosition(position);
+  c.beginPath();
+  c.arc(pos.x + cellwidth / 2, pos.y + cellheight / 2, 20, 0, Math.PI * 2);
+  c.fillStyle = 'red';
+  c.fill();
+  c.strokeStyle = 'darkred';
+  c.lineWidth = 3;
+  c.stroke();
+}
+
+drawPlayer(playerPosition);
 
 canvas.addEventListener('click', function (e) {
   const rect = canvas.getBoundingClientRect();
@@ -87,12 +211,72 @@ canvas.addEventListener('click', function (e) {
     mouseY >= y1 && mouseY <= y1 + min1
   ) {
     diceValue = Math.floor(Math.random() * 6) + 1;
+    
+    // Clear and redraw grid
+    c.clearRect(0, 0, canvas.width, canvas.height);
+    
+    let num = 1;
+    for (let row = 0; row < rows; row++) {
+      for (let col = 0; col < cols; col++) {
+        const actualCol = (row % 2 === 0 ? col : cols - 1 - col);
+        const x = actualCol * cellwidth;
+        const y = (rows - 1 - row) * cellheight;
+
+        c.strokeRect(x, y, cellwidth, cellheight);
+        c.fillStyle = 'rgb(30,30,30)';
+        c.font = `${Math.min(cellwidth, cellheight) / 2}px Arial`;
+        c.textAlign = 'center';
+        c.textBaseline = 'middle';
+        c.fillText(num, x + cellwidth / 2, y + cellheight / 2);
+        num++;
+
+        if(num%3==0){
+          c.fillStyle = 'rgba(173, 216, 230, 0.5)';
+          c.fillRect(x, y, cellwidth, cellheight);
+        }
+        else if(num%3==1){
+          c.fillStyle = 'rgba(128, 0, 128, 0.5)';
+          c.fillRect(x, y, cellwidth, cellheight);
+        }
+        else {
+          c.fillStyle = 'rgba(255, 182, 193, 0.5)';
+          c.fillRect(x, y, cellwidth, cellheight);
+        }
+      }
+    }
+    
+    // Redraw snakes and ladders (they stay the same now)
+    drawSnakes();
+    drawLadders();
+    
+    // Move player
+    playerPosition += diceValue;
+    if (playerPosition > 100) {
+      playerPosition = 100;
+    }
+    
+    // Check for snakes
+    const snakeHit = snakes.find(s => s.from === playerPosition);
+    if (snakeHit) {
+      playerPosition = snakeHit.to;
+    }
+    
+    // Check for ladders
+    const ladderHit = ladders.find(l => l.from === playerPosition);
+    if (ladderHit) {
+      playerPosition = ladderHit.to;
+    }
+    
+    drawPlayer(playerPosition);
     drawDiceFace(diceValue, x1, y1, min1);
+    
+    if (playerPosition === 100) {
+      c.fillStyle = 'rgba(0, 0, 0, 0.7)';
+      c.fillRect(0, 0, canvas.width, canvas.height);
+      c.fillStyle = 'gold';
+      c.font = 'bold 60px Arial';
+      c.textAlign = 'center';
+      c.fillText('YOU WIN!', canvas.width / 2, canvas.height / 2);
+    }
   }
 });
-
-
-
-
-
-

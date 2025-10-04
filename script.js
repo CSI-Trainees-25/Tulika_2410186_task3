@@ -40,7 +40,7 @@ for (let row = 0; row < rows; row++) {
   }
 }
 
-// Define snakes (from -> to)
+
 const snakes = [
   { from: 99, to: 7 },
   { from: 70, to: 55 },
@@ -49,7 +49,7 @@ const snakes = [
   { from: 95, to: 72 }
 ];
 
-// Define ladders (from -> to)
+
 const ladders = [
   { from: 6, to: 25 },
   { from: 11, to: 32 },
@@ -58,7 +58,7 @@ const ladders = [
   { from: 17, to: 65 }
 ];
 
-// Helper function to get cell position from number
+
 function getCellPosition(number) {
   number = number - 1;
   const row = Math.floor(number / cols);
@@ -69,7 +69,7 @@ function getCellPosition(number) {
   return { x, y };
 }
 
-// Store random control points for snakes so they don't change
+
 const snakeControlPoints = snakes.map(snake => {
   const start = getCellPosition(snake.from);
   const end = getCellPosition(snake.to);
@@ -84,7 +84,7 @@ const snakeControlPoints = snakes.map(snake => {
   };
 });
 
-// Function to draw all snakes
+
 function drawSnakes() {
   snakeControlPoints.forEach(snake => {
     c.beginPath();
@@ -119,7 +119,7 @@ function drawSnakes() {
   });
 }
 
-// Function to draw all ladders
+
 function drawLadders() {
   ladders.forEach(ladder => {
     const start = getCellPosition(ladder.from);
@@ -157,7 +157,7 @@ function drawLadders() {
   });
 }
 
-// Draw initial snakes and ladders
+
 drawSnakes();
 drawLadders();
 
@@ -184,7 +184,7 @@ const y1= canvas.height/2 - min1/2;
 let diceValue = Math.floor(Math.random() * 6) + 1;
 drawDiceFace(diceValue, x1, y1, min1);
 
-// Player position - starts at 0, first roll moves to position
+
 let playerPosition = 0;
 
 function drawPlayer(position) {
@@ -212,7 +212,7 @@ canvas.addEventListener('click', function (e) {
   ) {
     diceValue = Math.floor(Math.random() * 6) + 1;
     
-    // Clear and redraw grid
+    
     c.clearRect(0, 0, canvas.width, canvas.height);
     
     let num = 1;
@@ -245,23 +245,23 @@ canvas.addEventListener('click', function (e) {
       }
     }
     
-    // Redraw snakes and ladders (they stay the same now)
+    
     drawSnakes();
     drawLadders();
     
-    // Move player
+    
     playerPosition += diceValue;
     if (playerPosition > 100) {
       playerPosition = 100;
     }
     
-    // Check for snakes
+   
     const snakeHit = snakes.find(s => s.from === playerPosition);
     if (snakeHit) {
       playerPosition = snakeHit.to;
     }
     
-    // Check for ladders
+    
     const ladderHit = ladders.find(l => l.from === playerPosition);
     if (ladderHit) {
       playerPosition = ladderHit.to;
